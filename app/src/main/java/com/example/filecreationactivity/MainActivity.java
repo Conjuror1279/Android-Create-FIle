@@ -48,24 +48,27 @@ public class MainActivity extends AppCompatActivity {
         mBtnCreateFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                File fileFolder = new File(Environment.getDataDirectory(), "PlayBackShots");
                 checkAndRequestPermissions();
-                File videoFile = new File(Environment.getExternalStorageDirectory().
-                        getPath() + "droame.mp4");
-                notificationView.setText(getApplicationContext().getFilesDir().getAbsolutePath() + "VideoView.mp4");
-                if(!videoFile.exists()) {
-                    try {
-                        videoFile.createNewFile();
-                        Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
-                        notificationView.setText("file created successfully");
-                    } catch (IOException e) {
-                        Toast.makeText(MainActivity.this, e.toString(), LENGTH_LONG);
-                        notificationView.setText("Error" + e.toString());
-                    }
-                }
-
             }
         });
+    }
+
+    private void createFile() {
+//        File fileFolder = new File(Environment.getDataDirectory(), "PlayBackShots");
+        File videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
+                getPath() + "droame.jpeg");
+        notificationView.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
+                getPath() + "droame.jpeg");
+        if(!videoFile.exists()) {
+            try {
+                videoFile.createNewFile();
+                Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
+                notificationView.setText("file created successfully");
+            } catch (IOException e) {
+                Toast.makeText(MainActivity.this, e.toString(), LENGTH_LONG);
+                notificationView.setText("Error" + e.toString());
+            }
+        }
     }
 
     private void checkAndRequestPermissions() {
@@ -79,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         // Request for missing permissions
         if (missingPermission.isEmpty()) {
 //            Toast.setResultToToast("Permissions Checked!");
+            createFile();
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(this,
                     missingPermission.toArray(new String[missingPermission.size()]),
