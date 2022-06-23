@@ -13,13 +13,17 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,19 +60,39 @@ public class MainActivity extends AppCompatActivity {
     private void createFile() {
 //        File fileFolder = new File(Environment.getDataDirectory(), "PlayBackShots");
         File videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
-                getPath() + "droame.jpeg");
+                getPath() + "droame");
         notificationView.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
-                getPath() + "droame.jpeg");
+                getPath() + "droame");
         if(!videoFile.exists()) {
-            try {
-                videoFile.createNewFile();
-                Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
-                notificationView.setText("file created successfully");
-            } catch (IOException e) {
-                Toast.makeText(MainActivity.this, e.toString(), LENGTH_LONG);
-                notificationView.setText("Error" + e.toString());
-            }
+            videoFile.mkdirs();
+            Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
+            notificationView.setText("file created successfully");
         }
+        File textFile = new File(videoFile, "sampleTest1.txt");
+        try {
+            textFile.createNewFile();
+        } catch (IOException e) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notificationView.setText(e.toString());
+                }
+            }, 5000);
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(textFile);
+            fos.write("Some Random Text".getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notificationView.setText(e.toString());
+                }
+            }, 10000);
+        }
+
     }
 
     private void checkAndRequestPermissions() {
