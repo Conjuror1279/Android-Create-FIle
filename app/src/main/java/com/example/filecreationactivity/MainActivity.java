@@ -30,10 +30,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button mBtnCreateFile;
+    private Button mBtnCreateFile, mBtnShowFiles;
     private TextView notificationView;
     private Context mContext;
     private static final int REQUEST_PERMISSION_CODE = 12345;
+    private File videoDir;
+
     private static final String[] REQUIRED_PERMISSION_LIST = new String[] {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -49,11 +51,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUI(Context context) {
         mBtnCreateFile = (Button) findViewById(R.id.create_file);
+        mBtnShowFiles = (Button) findViewById(R.id.show_files);
         notificationView = (TextView) findViewById(R.id.notification_text);
         mBtnCreateFile.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View view) {
                 checkAndRequestPermissions();
+            }
+        });
+        mBtnShowFiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAllSavedFiles();
             }
         });
     }
@@ -61,17 +71,21 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void createFile() {
 //        File fileFolder = new File(Environment.getDataDirectory(), "PlayBackShots");
-        File videoFile = new File(MainActivity.this.getApplicationContext().getDataDir()
-                + "droame");
-        notificationView.setText(MainActivity.this.getApplicationContext().getDataDir().getAbsolutePath() + "droame");
-        if(!videoFile.exists()) {
-            videoFile.mkdirs();
+
+        // File Creation Options: context.getDataDir, MainActivity.this.getExternalFilesDirs(Environment.DIRECTORY_PICTURES
+        // Environment.getExternalDir
+        videoDir = new File(getApplicationContext().getFilesDir()
+                + "/droame");
+        notificationView.setText(videoDir.getPath());
+        if(!videoDir.exists()) {
+            videoDir.mkdirs();
             Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
-            notificationView.setText("file created successfully");
+            notificationView.setText("folder created successfully");
         }
-        File textFile = new File(videoFile, "sampleTest1.txt");
+        File textFile = new File(videoDir + "sampleTest1.txt");
         try {
             textFile.createNewFile();
+            notificationView.setText("File Created successfully!");
         } catch (IOException e) {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -85,6 +99,13 @@ public class MainActivity extends AppCompatActivity {
             FileOutputStream fos = new FileOutputStream(textFile);
             fos.write("Some Random Text".getBytes(StandardCharsets.UTF_8));
             fos.close();
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notificationView.setText("Write to File Successful!");
+                }
+            }, 5000);
 
         } catch (IOException e) {
             Handler handler = new Handler();
@@ -95,9 +116,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 10000);
         }
-
     }
 
+    private void showAllSavedFiles() {
+        if(videoDir == null) {
+            notificationView.setText("No Video Directory found");
+            return;
+        }
+        File[] videoFiles = videoDir.listFiles();
+        if(videoFiles != null) {
+            StringBuilder notify = new StringBuilder("Files Present :\n");
+            for (File videoFile : videoFiles) {
+                notify.append(videoFile.getName() + "\n");
+            }
+            notificationView.setText(notify);
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkAndRequestPermissions() {
         // Check for permissions
         List<String> missingPermission = new ArrayList<>();
