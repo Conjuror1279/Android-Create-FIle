@@ -2,6 +2,7 @@ package com.example.filecreationactivity;
 
 import static android.widget.Toast.LENGTH_LONG;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -57,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void createFile() {
 //        File fileFolder = new File(Environment.getDataDirectory(), "PlayBackShots");
-        File videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
-                getPath() + "droame");
-        notificationView.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).
-                getPath() + "droame");
+        File videoFile = new File(MainActivity.this.getApplicationContext().getDataDir()
+                + "droame");
+        notificationView.setText(MainActivity.this.getApplicationContext().getDataDir().getAbsolutePath() + "droame");
         if(!videoFile.exists()) {
             videoFile.mkdirs();
             Toast.makeText(MainActivity.this, "File Created Successfully!", LENGTH_LONG);
@@ -76,19 +77,21 @@ public class MainActivity extends AppCompatActivity {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    notificationView.setText(e.toString());
+                    notificationView.setText("Create New File Error:" + e.toString());
                 }
             }, 5000);
         }
         try {
             FileOutputStream fos = new FileOutputStream(textFile);
             fos.write("Some Random Text".getBytes(StandardCharsets.UTF_8));
+            fos.close();
+
         } catch (IOException e) {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    notificationView.setText(e.toString());
+                    notificationView.setText("Write to File Error:" + e.toString());
                 }
             }, 10000);
         }
